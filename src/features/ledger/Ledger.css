@@ -1,0 +1,60 @@
+.ledger-page{
+  background:white;
+  padding:20px;
+  border-radius:8px;
+}
+
+.ledger-header{
+  margin-bottom:20px;
+}
+
+.ledger-table{
+  border:1px solid #eee;
+}
+
+.table-header{
+  display:grid;
+  grid-template-columns:1fr 2fr 1fr 2fr 2fr 1fr;
+  padding:12px;
+  background:#f9fafb;
+  font-weight:600;
+}
+
+.table-row{
+  display:grid;
+  grid-template-columns:1fr 2fr 1fr 2fr 2fr 1fr;
+  padding:12px;
+  border-top:1px solid #eee;
+}
+
+.empty-row{
+  padding:20px;
+  text-align:center;
+  color:#888;
+}
+
+.qty-plus{
+  color:#16a34a;
+  font-weight:600;
+}
+
+.qty-minus{
+  color:#dc2626;
+  font-weight:600;
+}
+
+.type-receipt{
+  color:#2563eb;
+}
+
+.type-delivery{
+  color:#dc2626;
+}
+
+.type-transfer{
+  color:#9333ea;
+}
+
+.type-adjustment{
+  color:#ea580c;
+}

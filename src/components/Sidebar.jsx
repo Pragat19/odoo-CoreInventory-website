@@ -10,6 +10,7 @@ export default function Sidebar() {
     { name: "Delivery Orders", path: "/delivery" },
     { name: "Internal Transfers", path: "/transfers" },
     { name: "Stock Adjustment", path: "/adjustments" },
+    { name: "Stock Ledger", path: "/ledger" },
     { name: "Warehouse", path: "/warehouse" },
   ];
 
