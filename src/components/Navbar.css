@@ -1,0 +1,19 @@
+.navbar{
+  height:60px;
+  background:white;
+  border-bottom:1px solid #eee;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 25px;
+}
+
+.navbar-title{
+  font-size:18px;
+  font-weight:600;
+}
+
+.navbar-user{
+  font-size:14px;
+  color:#444;
+}

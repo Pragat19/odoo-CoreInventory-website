@@ -1,0 +1,94 @@
+/* Container */
+.app-textfield {
+  width: 100%;
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Label */
+.app-textfield-label {
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #475569;
+  font-weight: 500;
+}
+
+.required {
+  color: red;
+  margin-left: 4px;
+}
+
+/* Input Wrapper */
+.app-input-wrapper {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.app-input-wrapper:focus-within {
+  border-color: #1E3A8A;
+  box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.1);
+}
+
+/* Error State */
+.input-error {
+  border-color: #ef4444;
+}
+
+.input-error:focus-within {
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+}
+
+/* Disabled */
+.input-disabled {
+  background: #f1f5f9;
+  cursor: not-allowed;
+}
+
+/* Input */
+.app-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  color: #334155;
+}
+
+.app-input::placeholder {
+  color: #94a3b8;
+}
+
+/* Icons */
+.input-icon {
+  display: flex;
+  align-items: center;
+  color: #94a3b8;
+}
+
+/* Password Toggle */
+.password-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  transition: 0.2s;
+}
+
+.password-toggle:hover {
+  color: #1E3A8A;
+}
+
+/* Error Text */
+.input-error-text {
+  margin-top: 5px;
+  font-size: 12px;
+  color: #ef4444;
+}
