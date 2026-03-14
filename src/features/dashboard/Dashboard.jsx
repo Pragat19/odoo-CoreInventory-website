@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import KpiCard from "./KpiCard";
 import "./Dashboard.css";
+
 import {
   Boxes,
   AlertTriangle,
@@ -9,35 +10,38 @@ import {
   ArrowRightLeft
 } from "lucide-react";
 
+import { apiRequest } from "../../services/api";
+
 export default function Dashboard() {
 
-  const [kpis, setKpis] = useState({
-    totalProducts: 0,
-    lowStock: 0,
-    pendingReceipts: 0,
-    pendingDeliveries: 0,
-    transfers: 0
-  });
+  const [kpis, setKpis] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchDashboard = async () => {
+
+    try {
+
+      const res = await apiRequest("dashboard", "GET");
+
+      if (res.status) {
+        setKpis(res.data);
+      }
+
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setLoading(false);
+    }
+
+  };
 
   useEffect(() => {
-
-    const products = JSON.parse(localStorage.getItem("products")) || [];
-    const receipts = JSON.parse(localStorage.getItem("receipts")) || [];
-    const deliveries = JSON.parse(localStorage.getItem("deliveries")) || [];
-    const transfers = JSON.parse(localStorage.getItem("transfers")) || [];
-
-    const lowStockCount = products.filter(p => p.stock <= 5).length;
-
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setKpis({
-      totalProducts: products.length,
-      lowStock: lowStockCount,
-      pendingReceipts: receipts.filter(r => r.status !== "Done").length,
-      pendingDeliveries: deliveries.filter(d => d.status !== "Shipped").length,
-      transfers: transfers.length
-    });
-
+    fetchDashboard();
   }, []);
+
+  if (loading) {
+    return <h3 style={{ padding: "20px" }}>Loading Dashboard...</h3>;
+  }
 
   return (
 
@@ -49,35 +53,35 @@ export default function Dashboard() {
 
         <KpiCard
           title="Total Products"
-          value={kpis.totalProducts}
+          value={kpis?.total_products}
           color="#2563eb"
           icon={<Boxes size={22} />}
         />
 
         <KpiCard
           title="Low Stock Items"
-          value={kpis.lowStock}
+          value={kpis?.low_stock_items}
           color="#dc2626"
           icon={<AlertTriangle size={22} />}
         />
 
         <KpiCard
-          title="Pending Receipts"
-          value={kpis.pendingReceipts}
+          title="Total Receipts"
+          value={kpis?.total_receipts}
           color="#9333ea"
           icon={<PackageCheck size={22} />}
         />
 
         <KpiCard
           title="Pending Deliveries"
-          value={kpis.pendingDeliveries}
+          value={kpis?.pending_deliveries}
           color="#ea580c"
           icon={<Truck size={22} />}
         />
 
         <KpiCard
-          title="Internal Transfers"
-          value={kpis.transfers}
+          title="Total Transfers"
+          value={kpis?.total_transfers}
           color="#16a34a"
           icon={<ArrowRightLeft size={22} />}
         />

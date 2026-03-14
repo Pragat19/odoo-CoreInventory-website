@@ -1,41 +1,92 @@
-import { useState } from "react";
+/* eslint-disable react-hooks/immutability */
+import { useState, useEffect } from "react";
 
 import AppTextField from "../../components/AppTextField";
 import AppDropdown from "../../components/AppDropdown";
 import AppButton from "../../components/AppButton";
 
-export default function TransferForm({ onSave, onClose }) {
+import {
+  storeTransfer,
+  updateTransfer
+} from "../../services/internalTransferService";
+
+import { getProducts } from "../../services/productService";
+import { getWarehouses } from "../../services/warehouseService";
+
+export default function TransferForm({ transfer, onSave, onClose }) {
+
+  const isEdit = !!transfer;
 
   const [form, setForm] = useState({
-    product: "",
-    fromLocation: "",
-    toLocation: "",
-    quantity: ""
+    product_id: "",
+    from_warehouse_id: "",
+    to_warehouse_id: "",
+    qty: "",
+    status: "pending"
   });
 
-  const products = [
-    { label: "Steel Rod", value: "Steel Rod" },
-    { label: "Office Chair", value: "Office Chair" },
-    { label: "Aluminium Sheet", value: "Aluminium Sheet" }
-  ];
+  const [products, setProducts] = useState([]);
+  const [warehouses, setWarehouses] = useState([]);
 
-  const locations = [
-    { label: "Main Warehouse", value: "Main Warehouse" },
-    { label: "Production Floor", value: "Production Floor" },
-    { label: "Rack A", value: "Rack A" },
-    { label: "Rack B", value: "Rack B" }
-  ];
+  useEffect(() => {
 
-  const handleSubmit = (e) => {
+    fetchProducts();
+    fetchWarehouses();
+
+    if (isEdit) {
+      setForm({
+        product_id: transfer.product_id,
+        from_warehouse_id: transfer.from_warehouse_id,
+        to_warehouse_id: transfer.to_warehouse_id,
+        qty: transfer.qty,
+        status: transfer.status
+      });
+    }
+
+  }, [transfer]);
+
+  const fetchProducts = async () => {
+    const res = await getProducts();
+    if (res.status) {
+      setProducts(
+        res.data.map(p => ({ label: p.name, value: p.id }))
+      );
+    }
+  };
+
+  const fetchWarehouses = async () => {
+    const res = await getWarehouses();
+    if (res.status) {
+      setWarehouses(
+        res.data.map(w => ({ label: w.name, value: w.id }))
+      );
+    }
+  };
+
+  const handleSubmit = async (e) => {
 
     e.preventDefault();
 
-    if (form.fromLocation === form.toLocation) {
+    if (form.from_warehouse_id === form.to_warehouse_id) {
       alert("Source and destination cannot be same");
       return;
     }
 
-    onSave(form);
+    try {
+
+      if (isEdit) {
+        await updateTransfer(transfer.id, form);
+        alert("Transfer updated successfully");
+      } else {
+        await storeTransfer(form);
+        alert("Transfer created successfully");
+      }
+
+      onSave();
+
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   return (
@@ -43,50 +94,67 @@ export default function TransferForm({ onSave, onClose }) {
 
       <div className="transfer-form">
 
-        <h3>Create Transfer</h3>
+        <h3>{isEdit ? "Edit Transfer" : "Create Transfer"}</h3>
 
         <form onSubmit={handleSubmit}>
 
           <AppDropdown
             label="Product"
             options={products}
-            value={form.product}
+            value={form.product_id}
             onChange={(e) =>
-              setForm({ ...form, product: e.target.value })
+              setForm({ ...form, product_id: e.target.value })
             }
+            required
           />
 
           <AppDropdown
-            label="From Location"
-            options={locations}
-            value={form.fromLocation}
+            label="From Warehouse"
+            options={warehouses}
+            value={form.from_warehouse_id}
             onChange={(e) =>
-              setForm({ ...form, fromLocation: e.target.value })
+              setForm({ ...form, from_warehouse_id: e.target.value })
             }
+            required
           />
 
           <AppDropdown
-            label="To Location"
-            options={locations}
-            value={form.toLocation}
+            label="To Warehouse"
+            options={warehouses}
+            value={form.to_warehouse_id}
             onChange={(e) =>
-              setForm({ ...form, toLocation: e.target.value })
+              setForm({ ...form, to_warehouse_id: e.target.value })
             }
+            required
           />
 
           <AppTextField
             label="Quantity"
             type="number"
-            value={form.quantity}
+            value={form.qty}
             onChange={(e) =>
-              setForm({ ...form, quantity: e.target.value })
+              setForm({ ...form, qty: e.target.value })
+            }
+            required
+          />
+
+          <AppDropdown
+            label="Status"
+            options={[
+              { label: "Pending", value: "pending" },
+              { label: "Done", value: "done" },
+              { label: "Cancelled", value: "cancelled" }
+            ]}
+            value={form.status}
+            onChange={(e) =>
+              setForm({ ...form, status: e.target.value })
             }
           />
 
-          <div style={{ display: "flex", gap: "10px" }}>
+          <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
 
             <AppButton
-              text="Validate Transfer"
+              text={isEdit ? "Update" : "Save"}
               type="submit"
             />
 

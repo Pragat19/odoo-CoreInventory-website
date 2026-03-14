@@ -3,20 +3,22 @@
 }
 
 .warehouse-form{
-  display:flex;
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
   gap:15px;
-  align-items:end;
   margin-bottom:25px;
+  align-items:end;
 }
 
-.warehouse-form .app-button{
-  margin-top: -10px;
+.table-container{
+  overflow-x:auto;
 }
 
 .warehouse-table{
   width:100%;
   border-collapse:collapse;
   background:white;
+  min-width:800px;
 }
 
 .warehouse-table th,
@@ -24,4 +26,36 @@
   padding:12px;
   border-bottom:1px solid #e5e7eb;
   text-align:left;
+}
+
+.action-icons{
+  display:flex;
+  gap:12px;
+}
+
+.edit-icon{
+  cursor:pointer;
+  color:#2563eb;
+  transition:0.2s;
+}
+
+.delete-icon{
+  cursor:pointer;
+  color:#dc2626;
+  transition:0.2s;
+}
+
+.edit-icon:hover,
+.delete-icon:hover{
+  transform:scale(1.2);
+}
+
+/* Mobile */
+
+@media (max-width:768px){
+
+  .warehouse-form{
+    grid-template-columns:1fr;
+  }
+
 }

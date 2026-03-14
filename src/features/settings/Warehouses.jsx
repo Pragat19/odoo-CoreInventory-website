@@ -1,101 +1,205 @@
 import { useState, useEffect } from "react";
 import AppTextField from "../../components/AppTextField";
 import AppButton from "../../components/AppButton";
-
+import {
+  getWarehouses,
+  storeWarehouse,
+  updateWarehouse,
+  deleteWarehouse
+} from "../../services/warehouseService";
+import { FaTrash, FaEdit } from "react-icons/fa";
 import "./Warehouses.css";
 
-export default function Warehouses(){
+export default function Warehouses() {
 
-  const [name,setName] = useState("");
-  const [warehouses,setWarehouses] = useState([]);
+  const [form, setForm] = useState({
+    name: "",
+    location: "",
+    phone: "",
+    is_active: true
+  });
 
-  useEffect(()=>{
-    const data = JSON.parse(localStorage.getItem("warehouses")) || [];
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setWarehouses(data);
-  },[]);
+  const [warehouses, setWarehouses] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const addWarehouse = () => {
+  useEffect(() => {
+    fetchWarehouses();
+  }, []);
 
-    if(!name.trim()) return;
+  const fetchWarehouses = async () => {
 
-    const newWarehouse = {
-      id: Date.now(),
-      name
-    };
+    try {
 
-    const updated = [...warehouses,newWarehouse];
+      const response = await getWarehouses();
 
-    setWarehouses(updated);
-    localStorage.setItem("warehouses",JSON.stringify(updated));
+      if (response.status) {
+        setWarehouses(response.data);
+      }
 
-    setName("");
-  };
-
-  const deleteWarehouse = (id) => {
-
-    const updated = warehouses.filter(w => w.id !== id);
-
-    setWarehouses(updated);
-    localStorage.setItem("warehouses",JSON.stringify(updated));
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setLoading(false);
+    }
 
   };
 
-  return(
+  const handleSubmit = async (e) => {
+
+    e.preventDefault();
+
+    try {
+
+      if (editingId) {
+
+        await updateWarehouse(editingId, form);
+        alert("Updated successfully");
+
+      } else {
+
+        await storeWarehouse(form);
+        alert("Added successfully");
+
+      }
+
+      setForm({
+        name: "",
+        location: "",
+        phone: "",
+        is_active: true
+      });
+
+      setEditingId(null);
+      fetchWarehouses();
+
+    } catch (error) {
+      alert(error.message);
+    }
+
+  };
+
+  const handleEdit = (warehouse) => {
+
+    setForm({
+      name: warehouse.name,
+      location: warehouse.location,
+      phone: warehouse.phone,
+      is_active: warehouse.is_active
+    });
+
+    setEditingId(warehouse.id);
+
+  };
+
+  const handleDelete = async (id) => {
+
+    if (!window.confirm("Delete this warehouse?")) return;
+
+    try {
+
+      await deleteWarehouse(id);
+      fetchWarehouses();
+
+    } catch (error) {
+      alert(error.message);
+    }
+
+  };
+
+  return (
 
     <div className="warehouse-page">
 
       <h2>Warehouse Settings</h2>
 
-      <div className="warehouse-form">
+      {/* Form */}
+
+      <form className="warehouse-form" onSubmit={handleSubmit}>
 
         <AppTextField
           label="Warehouse Name"
-          placeholder="Enter warehouse"
-          value={name}
-          onChange={(e)=>setName(e.target.value)}
+          value={form.name}
+          onChange={(e)=>setForm({...form,name:e.target.value})}
+          required
+        />
+
+        <AppTextField
+          label="Location"
+          value={form.location}
+          onChange={(e)=>setForm({...form,location:e.target.value})}
+        />
+
+        <AppTextField
+          label="Phone"
+          value={form.phone}
+          onChange={(e)=>setForm({...form,phone:e.target.value})}
         />
 
         <AppButton
-          text="Add Warehouse"
-          onClick={addWarehouse}
-          width="200px"
+          text={editingId ? "Update" : "Add"}
+          type="submit"
+          width="180px"
         />
 
-      </div>
+      </form>
 
-      <table className="warehouse-table">
+      {/* Table */}
 
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Action</th>
-          </tr>
-        </thead>
+      <div className="table-container">
 
-        <tbody>
+        {loading && <p>Loading...</p>}
 
-          {warehouses.map(w => (
+        <table className="warehouse-table">
 
-            <tr key={w.id}>
-              <td>{w.name}</td>
-
-              <td>
-                <AppButton
-                  text="Delete"
-                  width="90px"
-                  backgroundColor="#dc2626"
-                  hoverColor="#b91c1c"
-                  onClick={()=>deleteWarehouse(w.id)}
-                />
-              </td>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Location</th>
+              <th>Phone</th>
+              <th>Status</th>
+              <th>Action</th>
             </tr>
+          </thead>
 
-          ))}
+          <tbody>
 
-        </tbody>
+            {warehouses.map(w => (
 
-      </table>
+              <tr key={w.id}>
+
+                <td>{w.name}</td>
+                <td>{w.location}</td>
+                <td>{w.phone}</td>
+                <td>
+                  {w.is_active ? "Active" : "Inactive"}
+                </td>
+
+                <td className="action-icons">
+
+                  <FaEdit
+                    className="edit-icon"
+                    onClick={()=>handleEdit(w)}
+                    title="Edit"
+                  />
+
+                  <FaTrash
+                    className="delete-icon"
+                    onClick={()=>handleDelete(w.id)}
+                    title="Delete"
+                  />
+
+                </td>
+
+              </tr>
+
+            ))}
+
+          </tbody>
+
+        </table>
+
+      </div>
 
     </div>
 

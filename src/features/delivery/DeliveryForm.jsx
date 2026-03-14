@@ -1,29 +1,84 @@
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
 import AppTextField from "../../components/AppTextField";
 import AppDropdown from "../../components/AppDropdown";
 import AppButton from "../../components/AppButton";
+import {
+  storeDelivery,
+  updateDelivery
+} from "../../services/deliveryService";
+import { getProducts } from "../../services/productService";
 
-export default function DeliveryForm({ onSave, onClose }) {
+export default function DeliveryForm({ delivery, onSave, onClose }) {
 
   const [form, setForm] = useState({
-    customer: "",
-    product: "",
-    quantity: ""
+    customer_name: "",
+    product_id: "",
+    qty: "",
+    status: "pending"   // ✅ Default status
   });
 
-  const products = [
-    { label: "Steel Rod", value: "Steel Rod" },
-    { label: "Office Chair", value: "Office Chair" },
-    { label: "Aluminium Sheet", value: "Aluminium Sheet" }
-  ];
+  const [products, setProducts] = useState([]);
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
 
+    // eslint-disable-next-line react-hooks/immutability
+    fetchProducts();
+
+    if (delivery) {
+      setForm({
+        customer_name: delivery.customer_name,
+        product_id: delivery.product_id,
+        qty: delivery.qty,
+        status: delivery.status || "pending"
+      });
+    }
+
+  }, []);
+
+  const fetchProducts = async () => {
+
+    try {
+
+      const response = await getProducts();
+
+      if (response.status) {
+
+        const formatted = response.data.map((p) => ({
+          label: p.name,
+          value: p.id
+        }));
+
+        setProducts(formatted);
+      }
+
+    } catch (error) {
+      alert(error.message);
+    }
+
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    onSave(form);
+    try {
 
+      if (delivery) {
+
+        const response = await updateDelivery(delivery.id, form);
+        alert(response.message || "Updated successfully");
+
+      } else {
+
+        const response = await storeDelivery(form);
+        alert(response.message || "Created successfully");
+
+      }
+
+      onSave();
+
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   return (
@@ -31,15 +86,17 @@ export default function DeliveryForm({ onSave, onClose }) {
 
       <div className="delivery-form">
 
-        <h3>Create Delivery Order</h3>
+        <h3>
+          {delivery ? "Edit Delivery" : "Create Delivery"}
+        </h3>
 
         <form onSubmit={handleSubmit}>
 
           <AppTextField
             label="Customer Name"
-            value={form.customer}
+            value={form.customer_name}
             onChange={(e) =>
-              setForm({ ...form, customer: e.target.value })
+              setForm({ ...form, customer_name: e.target.value })
             }
             required
           />
@@ -47,26 +104,40 @@ export default function DeliveryForm({ onSave, onClose }) {
           <AppDropdown
             label="Product"
             options={products}
-            value={form.product}
+            value={form.product_id}
             onChange={(e) =>
-              setForm({ ...form, product: e.target.value })
+              setForm({ ...form, product_id: e.target.value })
             }
           />
 
           <AppTextField
             label="Quantity"
             type="number"
-            value={form.quantity}
+            value={form.qty}
             onChange={(e) =>
-              setForm({ ...form, quantity: e.target.value })
+              setForm({ ...form, qty: e.target.value })
             }
             required
+          />
+
+          {/* ✅ STATUS DROPDOWN */}
+          <AppDropdown
+            label="Status"
+            options={[
+              { label: "Pending", value: "pending" },
+              { label: "Delivered", value: "delivered" },
+              { label: "Cancelled", value: "cancelled" }
+            ]}
+            value={form.status}
+            onChange={(e) =>
+              setForm({ ...form, status: e.target.value })
+            }
           />
 
           <div style={{ display: "flex", gap: "10px" }}>
 
             <AppButton
-              text="Validate Delivery"
+              text="Save"
               type="submit"
             />
 

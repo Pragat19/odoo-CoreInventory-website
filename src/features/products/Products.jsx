@@ -1,38 +1,56 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AppButton from "../../components/AppButton";
 import ProductForm from "./ProductForm";
 import "./Products.css";
+import { getProducts, deleteProduct } from "../../services/productService";
+import { FaEdit, FaTrash } from "react-icons/fa";
 
 export default function Products() {
 
   const [products, setProducts] = useState([]);
-
   const [editingProduct, setEditingProduct] = useState(null);
-
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const handleSave = (product) => {
+  // ✅ Fetch products from API
+  useEffect(() => {
 
-    if (editingProduct) {
+    fetchProducts();
 
-      setProducts(
-        products.map((p) =>
-          p.id === product.id ? product : p
-        )
-      );
+  }, []);
 
-    } else {
+  const fetchProducts = async () => {
 
-      setProducts([
-        ...products,
-        { ...product, id: Date.now() }
-      ]);
+    try {
+
+      const response = await getProducts();
+
+      if (response.status) {
+
+        setProducts(response.data);
+
+      }
+
+    } catch (error) {
+
+      alert(error.message);
+
+    } finally {
+
+      setLoading(false);
 
     }
 
+  };
+
+  const handleSave = () => {
+
+    // Refresh list after save
+    fetchProducts();
+
     setShowForm(false);
     setEditingProduct(null);
+
   };
 
   const handleEdit = (product) => {
@@ -42,11 +60,26 @@ export default function Products() {
 
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
 
-    const updated = products.filter((p) => p.id !== id);
+    if (!window.confirm("Are you sure you want to delete this product?")) {
+      return;
+    }
 
-    setProducts(updated);
+    try {
+
+      const response = await deleteProduct(id);
+
+      alert(response.message || "Product deleted successfully");
+
+      // Refresh list after delete
+      fetchProducts();
+
+    } catch (error) {
+
+      alert(error.message);
+
+    }
 
   };
 
@@ -55,8 +88,7 @@ export default function Products() {
 
       <div className="products-header">
 
-        <h2>Products</h2>
-
+        <div></div>
         <AppButton
           text="Add Product"
           onClick={() => {
@@ -68,21 +100,25 @@ export default function Products() {
 
       </div>
 
-      {/* Table */}
-
       <div className="product-table">
-
         <div className="table-header">
           <div>Name</div>
           <div>SKU</div>
           <div>Category</div>
+          <div>Unit</div>
           <div>Stock</div>
-          <div>Action</div>
+          <div style={{ textAlign: "center" }}>Action</div>
         </div>
 
-        {products.length === 0 && (
+        {loading && (
           <div className="empty-row">
-            No products added
+            Loading...
+          </div>
+        )}
+
+        {!loading && products.length === 0 && (
+          <div className="empty-row">
+            No products found
           </div>
         )}
 
@@ -92,26 +128,39 @@ export default function Products() {
 
             <div>{product.name}</div>
             <div>{product.sku}</div>
-            <div>{product.category}</div>
-            <div>{product.stock}</div>
 
-            <div className="table-actions">
+            {/* ✅ Show display names */}
+            <div>
+              {product.category?.display_name}
+            </div>
 
-              <AppButton
-                text="Edit"
-                width="70px"
-                height="35px"
-                backgroundColor="#2563eb"
+            <div>
+              {product.unit?.display_name}
+            </div>
+
+            <div>{product.stock_qty}</div>
+
+            <div className="table-actions" style={{ justifyContent: "center" }}>
+
+              {/* Edit Icon */}
+              <FaEdit
                 onClick={() => handleEdit(product)}
+                style={{
+                  cursor: "pointer",
+                  color: "#2563eb",
+                  fontSize: "18px",
+                }}
+                title="Edit"
               />
 
-              <AppButton
-                text="Delete"
-                width="80px"
-                height="35px"
-                backgroundColor="#dc2626"
-                hoverColor="#b91c1c"
+              <FaTrash
                 onClick={() => handleDelete(product.id)}
+                style={{
+                  cursor: "pointer",
+                  color: "#dc2626",
+                  fontSize: "18px",
+                }}
+                title="Delete"
               />
 
             </div>
@@ -121,8 +170,6 @@ export default function Products() {
         ))}
 
       </div>
-
-      {/* Form Modal */}
 
       {showForm && (
 

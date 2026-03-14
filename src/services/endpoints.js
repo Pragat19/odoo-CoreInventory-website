@@ -9,15 +9,19 @@ export const API_ENDPOINTS = {
     RESET_PASSWORD: "user/resetPassword",
   },
 
-  PRODUCTS: {
-    LIST: "/products",
-    CREATE: "/products",
-    UPDATE: (id) => `/products/${id}`,
-    DELETE: (id) => `/products/${id}`,
+  PRODUCT: {
+    STORE: "product/store",
+    LIST: "product/list",
+    DELETE: (id) => `product/delete/${id}`,
+    UPDATE: (id) => `product/update/${id}`,
   },
 
   WAREHOUSES: {
     LIST: "/warehouses",
+  },
+
+  MASTER_CATEGORY: {
+    LIST: "master-category/list",
   },
 
 };

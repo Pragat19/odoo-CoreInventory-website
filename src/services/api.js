@@ -1,11 +1,23 @@
 const BASE_URL = "https://odoo-core-inventory.gecpalanpur.com/api/";
 
-export async function apiRequest(endpoint, method = "GET", body = null, headers = {}) {
+export async function apiRequest(
+  endpoint,
+  method = "GET",
+  body = null,
+  headers = {}
+) {
+
+  // ✅ Get token from localStorage
+  const token = localStorage.getItem("token");
 
   const config = {
     method,
     headers: {
       "Content-Type": "application/json",
+
+      // ✅ Automatically attach token if exists
+      ...(token && { Authorization: `Bearer ${token}` }),
+
       ...headers,
     },
   };
@@ -20,7 +32,6 @@ export async function apiRequest(endpoint, method = "GET", body = null, headers 
 
   if (!response.ok) {
 
-    // 👇 Use backend "error" field first
     const errorMessage =
       data?.error ||
       data?.message ||

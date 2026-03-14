@@ -1,31 +1,75 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AppButton from "../../components/AppButton";
 import DeliveryForm from "./DeliveryForm";
 import "./Delivery.css";
+import { FaTrash, FaEdit } from "react-icons/fa";
+import {
+  getDeliveries,
+  deleteDelivery
+} from "../../services/deliveryService";
 
 export default function DeliveryOrders() {
 
   const [deliveries, setDeliveries] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [editingDelivery, setEditingDelivery] = useState(null);
 
-  const handleSave = (delivery) => {
+  useEffect(() => {
+    fetchDeliveries();
+  }, []);
 
-    const newDelivery = {
-      ...delivery,
-      id: Date.now(),
-      status: "Shipped"
-    };
+  const fetchDeliveries = async () => {
 
-    setDeliveries([...deliveries, newDelivery]);
+    try {
 
+      const response = await getDeliveries();
+
+      if (response.status) {
+        setDeliveries(response.data);
+      }
+
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setLoading(false);
+    }
+
+  };
+
+  const handleSave = () => {
+    fetchDeliveries();
     setShowForm(false);
+    setEditingDelivery(null);
+  };
+
+  const handleEdit = (delivery) => {
+    setEditingDelivery(delivery);
+    setShowForm(true);
+  };
+
+  const handleDelete = async (id) => {
+
+    if (!window.confirm("Delete this delivery order?")) return;
+
+    try {
+
+      const response = await deleteDelivery(id);
+
+      alert(response.message || "Deleted successfully");
+
+      fetchDeliveries();
+
+    } catch (error) {
+      alert(error.message);
+    }
+
   };
 
   return (
     <div className="delivery-page">
 
       <div className="delivery-header">
-
         <h2>Delivery Orders</h2>
 
         <AppButton
@@ -33,7 +77,6 @@ export default function DeliveryOrders() {
           width="150px"
           onClick={() => setShowForm(true)}
         />
-
       </div>
 
       <div className="delivery-table">
@@ -43,11 +86,16 @@ export default function DeliveryOrders() {
           <div>Product</div>
           <div>Quantity</div>
           <div>Status</div>
+          <div style={{ textAlign: "center" }}>Action</div>
         </div>
 
-        {deliveries.length === 0 && (
+        {loading && (
+          <div className="empty-row">Loading...</div>
+        )}
+
+        {!loading && deliveries.length === 0 && (
           <div className="empty-row">
-            No delivery orders created
+            No delivery orders found
           </div>
         )}
 
@@ -55,10 +103,29 @@ export default function DeliveryOrders() {
 
           <div key={d.id} className="table-row">
 
-            <div>{d.customer}</div>
-            <div>{d.product}</div>
-            <div>-{d.quantity}</div>
-            <div className="status-shipped">{d.status}</div>
+            <div>{d.customer_name}</div>
+            <div>{d.product?.name}</div>
+            <div>-{d.qty}</div>
+
+            <div className="status-pending">
+              {d.status}
+            </div>
+
+            <div className="table-actions">
+              <FaEdit
+                className="edit-icon"
+                title="Edit"
+                onClick={() => handleEdit(d)}
+              />
+
+              <FaTrash
+                onClick={() => handleDelete(d.id)}
+                className="delete-icon"
+                title="Delete"
+              />
+
+
+            </div>
 
           </div>
 
@@ -68,8 +135,12 @@ export default function DeliveryOrders() {
 
       {showForm && (
         <DeliveryForm
+          delivery={editingDelivery}
           onSave={handleSave}
-          onClose={() => setShowForm(false)}
+          onClose={() => {
+            setShowForm(false);
+            setEditingDelivery(null);
+          }}
         />
       )}
 
