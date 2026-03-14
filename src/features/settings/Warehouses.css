@@ -1,0 +1,27 @@
+.warehouse-page{
+  padding:20px;
+}
+
+.warehouse-form{
+  display:flex;
+  gap:15px;
+  align-items:end;
+  margin-bottom:25px;
+}
+
+.warehouse-form .app-button{
+  margin-top: -10px;
+}
+
+.warehouse-table{
+  width:100%;
+  border-collapse:collapse;
+  background:white;
+}
+
+.warehouse-table th,
+.warehouse-table td{
+  padding:12px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:left;
+}
