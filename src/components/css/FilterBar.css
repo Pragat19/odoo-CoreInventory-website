@@ -1,5 +1,20 @@
 .filter-bar{
   display:flex;
+  flex-wrap:wrap;            /* allow wrapping */
   gap:15px;
+
+  background:white;          /* container background */
+  padding:15px 20px;
+  border-radius:10px;
+
+  box-shadow:0 4px 10px rgba(0,0,0,0.05);
   margin-bottom:20px;
 }
+
+/* make dropdown take equal width */
+
+.filter-bar .app-textfield{
+  flex:1;
+  min-width:200px;
+}
+

@@ -3,7 +3,7 @@ import AppButton from "./AppButton";
 import "./css/Sidebar.css";
 import { LogOut } from "lucide-react";
 
-export default function Sidebar() {
+export default function Sidebar({ open }) {
 
   const navigate = useNavigate();
 
@@ -20,14 +20,13 @@ export default function Sidebar() {
   ];
 
   const handleLogout = () => {
-
     localStorage.removeItem("user");
     navigate("/login");
-
   };
 
   return (
-    <div className="sidebar">
+
+    <div className={`sidebar ${open ? "open" : "closed"}`}>
 
       <div className="sidebar-logo">
         CoreInventory
@@ -51,7 +50,6 @@ export default function Sidebar() {
 
       </div>
 
-      {/* Logout Button */}
       <div className="sidebar-logout">
 
         <AppButton
@@ -67,5 +65,6 @@ export default function Sidebar() {
       </div>
 
     </div>
+
   );
 }
