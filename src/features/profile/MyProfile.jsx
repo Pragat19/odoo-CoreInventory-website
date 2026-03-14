@@ -2,54 +2,106 @@ import { useEffect, useState } from "react";
 import AppTextField from "../../components/AppTextField";
 import AppButton from "../../components/AppButton";
 
-export default function MyProfile(){
+import {
+  getProfile,
+  updateProfile
+} from "../../services/profileService";
 
-  const [user,setUser] = useState({
-    name:"",
-    email:""
+export default function MyProfile() {
+
+  const [user, setUser] = useState({
+    name: "",
+    email: "",
+    phone: ""
   });
 
-  useEffect(()=>{
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    if(storedUser){
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setUser(storedUser);
+  const [loading, setLoading] = useState(true);
+
+  // 📥 Load profile from API
+  const fetchProfile = async () => {
+
+    try {
+
+      const res = await getProfile();
+
+      if (res.status) {
+        setUser(res.user);
+      }
+
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setLoading(false);
     }
-  },[]);
-
-  const handleSave = () => {
-
-    localStorage.setItem("user",JSON.stringify(user));
-    alert("Profile updated");
 
   };
 
-  return(
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
-    <div style={{padding:"20px"}}>
+  // 💾 Save profile
+  const handleSave = async () => {
+
+    try {
+
+      const res = await updateProfile(user);
+
+      if (res.status) {
+        alert("Profile updated successfully");
+        fetchProfile(); // refresh data
+      }
+
+    } catch (error) {
+      alert(error.message);
+    }
+
+  };
+
+  if (loading) {
+    return <h3 style={{ padding: "20px" }}>Loading profile...</h3>;
+  }
+
+  return (
+
+    <div style={{ padding: "20px" }}>
 
       <h2>My Profile</h2>
 
-      <div style={{maxWidth:"400px",marginTop:"20px"}}>
+      <div style={{ maxWidth: "400px", marginTop: "20px" }}>
 
         <AppTextField
           label="Name"
-          value={user.name}
-          onChange={(e)=>setUser({...user,name:e.target.value})}
+          value={user.name || ""}
+          onChange={(e) =>
+            setUser({ ...user, name: e.target.value })
+          }
         />
 
         <AppTextField
           label="Email"
-          value={user.email}
-          onChange={(e)=>setUser({...user,email:e.target.value})}
+          value={user.email || ""}
+          onChange={(e) =>
+            setUser({ ...user, email: e.target.value })
+          }
         />
 
-        <div style={{marginTop:"15px"}}>
+        <AppTextField
+          label="Phone"
+          value={user.phone || ""}
+          onChange={(e) =>
+            setUser({ ...user, phone: e.target.value })
+          }
+        />
+
+        <div style={{ marginTop: "15px" }}>
+
           <AppButton
             text="Save Changes"
             onClick={handleSave}
             width="180px"
           />
+
         </div>
 
       </div>
