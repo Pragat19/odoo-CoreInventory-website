@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import AppTextField from "../../components/AppTextField";
 import AppButton from "../../components/AppButton";
+import { forgotPassword } from "../../services/authService";
 
 export default function ForgotPassword() {
 
@@ -10,17 +10,25 @@ export default function ForgotPassword() {
 
   const [email, setEmail] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
 
     e.preventDefault();
 
-    if (!email) return alert("Enter email");
+    try {
 
-    // Simulate OTP sending
-    alert("OTP sent to email");
+      await forgotPassword(email);
 
-    navigate("/verify-otp");
+      localStorage.setItem("resetEmail", email); // ✅ Save email
 
+      alert("OTP sent successfully");
+
+      navigate("/verify-otp");
+
+    } catch (error) {
+
+      alert(error.message);
+
+    }
   };
 
   return (
@@ -36,7 +44,7 @@ export default function ForgotPassword() {
             label="Email"
             placeholder="Enter your email"
             value={email}
-            onChange={(e)=>setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
 
