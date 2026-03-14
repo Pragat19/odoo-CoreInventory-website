@@ -1,24 +1,33 @@
-import Sidebar from "../components/Sidebar";
+import { useState } from "react";
 import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
 import "./MainLayout.css";
 
 export default function MainLayout({ children }) {
 
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
   return (
-    <div className="main-layout">
 
-      <Sidebar />
+    <div className={`layout ${sidebarOpen ? "" : "collapsed"}`}>
 
-      <div className="layout-content">
+      <Sidebar open={sidebarOpen} />
 
-        <Navbar />
+      <div className="layout-main">
 
-        <div className="page-content">
+        <Navbar toggleSidebar={toggleSidebar} />
+
+        <div className="layout-content">
           {children}
         </div>
 
       </div>
 
     </div>
+
   );
 }
