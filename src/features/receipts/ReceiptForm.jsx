@@ -1,45 +1,94 @@
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
 import AppTextField from "../../components/AppTextField";
 import AppButton from "../../components/AppButton";
 import AppDropdown from "../../components/AppDropdown";
+import {
+  storeReceipt,
+  updateReceipt
+} from "../../services/receiptService";
 
-export default function ReceiptForm({ onSave, onClose }) {
+import { getProducts } from "../../services/productService";
+
+export default function ReceiptForm({
+  receipt,
+  onSave,
+  onClose
+}) {
 
   const [form, setForm] = useState({
-    supplier: "",
-    product: "",
-    quantity: "",
+    supplier_name: "",
+    product_id: "",
+    qty: ""
   });
 
-  const products = [
-    { label: "Steel Rod", value: "Steel Rod" },
-    { label: "Office Chair", value: "Office Chair" },
-    { label: "Aluminium Sheet", value: "Aluminium Sheet" }
-  ];
+  const [products, setProducts] = useState([]);
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+
+    // eslint-disable-next-line react-hooks/immutability
+    fetchProducts();
+
+    if (receipt) {
+      setForm(receipt);
+    }
+
+  }, []);
+
+  const fetchProducts = async () => {
+
+    const response = await getProducts();
+
+    if (response.status) {
+
+      const formatted = response.data.map((p) => ({
+        label: p.name,
+        value: p.id
+      }));
+
+      setProducts(formatted);
+    }
+  };
+
+  const handleSubmit = async (e) => {
 
     e.preventDefault();
 
-    onSave(form);
+    try {
 
+      if (receipt) {
+
+        await updateReceipt(receipt.id, form);
+
+        alert("Receipt updated");
+
+      } else {
+
+        await storeReceipt(form);
+
+        alert("Receipt created");
+
+      }
+
+      onSave();
+
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   return (
     <div className="receipt-modal">
-
       <div className="receipt-form">
 
-        <h3>Create Receipt</h3>
+        <h3>{receipt ? "Edit Receipt" : "Create Receipt"}</h3>
 
         <form onSubmit={handleSubmit}>
 
           <AppTextField
             label="Supplier Name"
-            value={form.supplier}
+            value={form.supplier_name}
             onChange={(e) =>
-              setForm({ ...form, supplier: e.target.value })
+              setForm({ ...form, supplier_name: e.target.value })
             }
             required
           />
@@ -47,42 +96,34 @@ export default function ReceiptForm({ onSave, onClose }) {
           <AppDropdown
             label="Product"
             options={products}
-            value={form.product}
+            value={form.product_id}
             onChange={(e) =>
-              setForm({ ...form, product: e.target.value })
+              setForm({ ...form, product_id: e.target.value })
             }
           />
 
           <AppTextField
-            label="Quantity Received"
+            label="Quantity"
             type="number"
-            value={form.quantity}
+            value={form.qty}
             onChange={(e) =>
-              setForm({ ...form, quantity: e.target.value })
+              setForm({ ...form, qty: e.target.value })
             }
             required
           />
 
           <div style={{ display: "flex", gap: "10px" }}>
-
-            <AppButton
-              text="Validate Receipt"
-              type="submit"
-            />
-
+            <AppButton text="Save" type="submit" />
             <AppButton
               text="Cancel"
               backgroundColor="#6b7280"
-              hoverColor="#4b5563"
               onClick={onClose}
             />
-
           </div>
 
         </form>
 
       </div>
-
     </div>
   );
 }

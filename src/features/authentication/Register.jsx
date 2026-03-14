@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import AppTextField from "../../components/AppTextField";
 import AppButton from "../../components/AppButton";
+import { registerUser } from "../../services/authService";
 
 import "./Auth.css";
 
@@ -12,25 +13,32 @@ export default function Register() {
   const [form, setForm] = useState({
     name: "",
     email: "",
-    role: "",
     password: "",
   });
 
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.value ? e.target.name : "role"]: e.target.value,
-    });
-  };
+  const handleSubmit = async (e) => {
 
-  const handleSubmit = (e) => {
     e.preventDefault();
 
-    localStorage.setItem("user", JSON.stringify(form));
+    try {
 
-    alert("Account Created");
+      const response = await registerUser({
+        name: form.name,
+        email: form.email,
+        phone: null,
+        password: form.password
+      });
 
-    navigate("/");
+      alert(response.message || "Account Created");
+
+      navigate("/");
+
+    } catch (error) {
+
+      alert(error.error);
+
+    }
+
   };
 
   return (

@@ -1,31 +1,69 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AppButton from "../../components/AppButton";
 import ReceiptForm from "./ReceiptForm";
 import "./Receipts.css";
+import { getReceipts, deleteReceipt } from "../../services/receiptService";
+import { FaTrash } from "react-icons/fa";
 
 export default function Receipts() {
 
   const [receipts, setReceipts] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const handleSave = (receipt) => {
+  // 🔄 Fetch Receipts
+  useEffect(() => {
+    fetchReceipts();
+  }, []);
 
-    const newReceipt = {
-      ...receipt,
-      id: Date.now(),
-      status: "Done"
-    };
+  const fetchReceipts = async () => {
 
-    setReceipts([...receipts, newReceipt]);
+    try {
 
+      const response = await getReceipts();
+
+      if (response.status) {
+        setReceipts(response.data);
+      }
+
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setLoading(false);
+    }
+
+  };
+
+  const handleSave = () => {
+    fetchReceipts();
     setShowForm(false);
+  };
+
+  const handleDelete = async (id) => {
+
+    if (!window.confirm("Are you sure you want to delete this receipt?")) {
+      return;
+    }
+
+    try {
+
+      const response = await deleteReceipt(id);
+
+      alert(response.message || "Deleted successfully");
+
+      fetchReceipts();
+
+    } catch (error) {
+      alert(error.message);
+    }
+
   };
 
   return (
     <div className="receipts-page">
 
+      {/* Header */}
       <div className="receipts-header">
-
         <h2>Receipts (Incoming Goods)</h2>
 
         <AppButton
@@ -33,11 +71,9 @@ export default function Receipts() {
           width="150px"
           onClick={() => setShowForm(true)}
         />
-
       </div>
 
       {/* Table */}
-
       <div className="receipt-table">
 
         <div className="table-header">
@@ -45,11 +81,16 @@ export default function Receipts() {
           <div>Product</div>
           <div>Quantity</div>
           <div>Status</div>
+          <div style={{ textAlign: "center" }}>Action</div>
         </div>
 
-        {receipts.length === 0 && (
+        {loading && (
+          <div className="empty-row">Loading...</div>
+        )}
+
+        {!loading && receipts.length === 0 && (
           <div className="empty-row">
-            No receipts created
+            No receipts found
           </div>
         )}
 
@@ -57,10 +98,21 @@ export default function Receipts() {
 
           <div key={r.id} className="table-row">
 
-            <div>{r.supplier}</div>
-            <div>{r.product}</div>
-            <div>+{r.quantity}</div>
-            <div className="status-done">{r.status}</div>
+            <div>{r.supplier_name}</div>
+            <div>{r.product?.name}</div>
+            <div>+{r.qty}</div>
+
+            <div className="status-done">
+              Done
+            </div>
+
+            <div className="table-actions">
+              <FaTrash
+                onClick={() => handleDelete(r.id)}
+                title="Delete"
+                className="delete-icon"
+              />
+            </div>
 
           </div>
 
@@ -68,6 +120,7 @@ export default function Receipts() {
 
       </div>
 
+      {/* Modal */}
       {showForm && (
         <ReceiptForm
           onSave={handleSave}

@@ -1,8 +1,10 @@
 import { useState } from "react";
-
+import { useEffect } from "react";
+import { apiRequest } from "../../services/api";
 import AppTextField from "../../components/AppTextField";
 import AppButton from "../../components/AppButton";
 import AppDropdown from "../../components/AppDropdown";
+import { storeProduct, updateProduct } from "../../services/productService";
 
 export default function ProductForm({
   product,
@@ -20,19 +22,113 @@ export default function ProductForm({
     }
   );
 
-  const handleSubmit = (e) => {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [units, setUnits] = useState([]);
+
+  // ✅ Fetch categories from API
+  useEffect(() => {
+
+    const fetchData = async () => {
+
+      try {
+
+        // ✅ Fetch Categories
+        const categoryResponse = await apiRequest(
+          "master-category/list",
+          "GET"
+        );
+
+        if (categoryResponse.status) {
+
+          const formattedCategories = categoryResponse.data.map((cat) => ({
+            label: cat.display_name,
+            value: cat.id,
+          }));
+
+          setCategories(formattedCategories);
+
+        }
+
+        // ✅ Fetch Units
+        const unitResponse = await apiRequest(
+          "master-unit/list",
+          "GET"
+        );
+
+        if (unitResponse.status) {
+
+          const formattedUnits = unitResponse.data.map((unit) => ({
+            label: unit.display_name,
+            value: unit.id,
+          }));
+
+          setUnits(formattedUnits);
+
+        }
+
+      } catch (error) {
+
+        alert(error.message);
+
+      } finally {
+
+        setLoading(false);
+
+      }
+
+    };
+
+    fetchData();
+
+  }, []);
+
+  const handleSubmit = async (e) => {
 
     e.preventDefault();
 
-    onSave(form);
+    try {
+
+      const payload = {
+        name: form.name,
+        sku: form.sku,
+        category_id: form.category,
+        unit_id: form.unit,
+        stock_qty: form.stock ? Number(form.stock) : 0,
+      };
+
+      if (product) {
+
+        const updatePayload = {
+          name: form.name,
+          sku: form.sku,
+          category_id: Number(form.category),
+          unit_id: Number(form.unit),
+          stock_qty: Number(form.stock),
+        };
+
+        await updateProduct(product.id, updatePayload);
+
+        alert("Product updated successfully");
+
+      } else {
+
+        // ✅ CREATE
+        const response = await storeProduct(payload);
+
+        alert(response.message || "Product created successfully");
+
+      }
+
+      onSave(); // refresh list
+
+    } catch (error) {
+
+      alert(error.message);
+
+    }
 
   };
-
-  const categories = [
-    { label: "Raw Material", value: "raw" },
-    { label: "Finished Goods", value: "finished" },
-    { label: "Packaging", value: "packaging" },
-  ];
 
   return (
     <div className="product-modal">
@@ -63,6 +159,7 @@ export default function ProductForm({
             required
           />
 
+          {/* ✅ Dynamic Categories */}
           <AppDropdown
             label="Category"
             options={categories}
@@ -70,6 +167,7 @@ export default function ProductForm({
             onChange={(e) =>
               setForm({ ...form, category: e.target.value })
             }
+            disabled={loading}
           />
 
           <AppTextField
@@ -81,13 +179,14 @@ export default function ProductForm({
             }
           />
 
-          <AppTextField
+          <AppDropdown
             label="Unit of Measure"
-            placeholder="kg, pcs, box"
+            options={units}
             value={form.unit}
             onChange={(e) =>
               setForm({ ...form, unit: e.target.value })
             }
+            disabled={loading}
           />
 
           <div style={{ display: "flex", gap: "10px" }}>

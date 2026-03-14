@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-
 import AppTextField from "../../components/AppTextField";
 import AppButton from "../../components/AppButton";
-
 import "./Auth.css";
+import { loginUser } from "../../services/authService";
 
 export default function Login() {
 
@@ -15,20 +14,25 @@ export default function Login() {
     password: "",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const user = JSON.parse(localStorage.getItem("user"));
+    try {
+      const response = await loginUser({
+        email: form.email,
+        password: form.password,
+      });
 
-    if (
-      user &&
-      user.email === form.email &&
-      user.password === form.password
-    ) {
+      // If backend returns token, save it
+      if (response.token) {
+        localStorage.setItem("token", response.token);
+      }
+
       alert("Login successful");
       navigate("/dashboard");
-    } else {
-      alert("Invalid credentials");
+
+    } catch (error) {
+      alert(error.message);
     }
   };
 
@@ -58,13 +62,13 @@ export default function Login() {
         />
 
         <div className="forgot-row">
-  <p
-    className="forgot-password"
-    onClick={() => navigate("/forgot-password")}
-  >
-    Forgot Password?
-  </p>
-</div>
+          <p
+            className="forgot-password"
+            onClick={() => navigate("/forgot-password")}
+          >
+            Forgot Password?
+          </p>
+        </div>
 
         <AppButton
           type="submit"
