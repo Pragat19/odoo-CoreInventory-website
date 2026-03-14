@@ -11,6 +11,12 @@ import Transfers from "./features/transfers/Transfers";
 import DeliveryOrders from "./features/delivery/DeliveryOrders";
 import Adjustments from "./features/adjustments/Adjustments";
 import StockLedger from "./features/ledger/StockLedger";
+import ForgotPassword from "./features/authentication/ForgotPassword";
+import VerifyOtp from "./features/authentication/VerifyOtp";
+import ResetPassword from "./features/authentication/ResetPassword";
+import "./App.css";
+import Warehouses from "./features/settings/Warehouses";
+import MyProfile from "./features/profile/MyProfile";
 
 export default function App() {
 
@@ -20,8 +26,11 @@ export default function App() {
       <Routes>
 
         <Route path="/" element={<Login />} />
-
+        <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/verify-otp" element={<VerifyOtp />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         <Route
           path="/dashboard"
@@ -82,6 +91,24 @@ export default function App() {
           element={
             <MainLayout>
               <StockLedger />
+            </MainLayout>
+          }
+        />
+
+        <Route
+          path="/warehouses"
+          element={
+            <MainLayout>
+              <Warehouses />
+            </MainLayout>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <MainLayout>
+              <MyProfile />
             </MainLayout>
           }
         />

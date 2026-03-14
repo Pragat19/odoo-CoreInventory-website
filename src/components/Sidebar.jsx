@@ -1,7 +1,11 @@
-import { NavLink } from "react-router-dom";
-import "./Sidebar.css";
+import { NavLink, useNavigate } from "react-router-dom";
+import AppButton from "./AppButton";
+import "./css/Sidebar.css";
+import { LogOut } from "lucide-react";
 
 export default function Sidebar() {
+
+  const navigate = useNavigate();
 
   const menu = [
     { name: "Dashboard", path: "/dashboard" },
@@ -11,8 +15,16 @@ export default function Sidebar() {
     { name: "Internal Transfers", path: "/transfers" },
     { name: "Stock Adjustment", path: "/adjustments" },
     { name: "Stock Ledger", path: "/ledger" },
-    { name: "Warehouse", path: "/warehouse" },
+    { name: "Warehouse", path: "/warehouses" },
+    { name: "Profile", path: "/profile" },
   ];
+
+  const handleLogout = () => {
+
+    localStorage.removeItem("user");
+    navigate("/login");
+
+  };
 
   return (
     <div className="sidebar">
@@ -36,6 +48,21 @@ export default function Sidebar() {
           </NavLink>
 
         ))}
+
+      </div>
+
+      {/* Logout Button */}
+      <div className="sidebar-logout">
+
+        <AppButton
+          text="Logout"
+          onClick={handleLogout}
+          backgroundColor="white"
+          hoverColor="#f3f4f6"
+          textColor="red"
+          border="none"
+          prefixIcon={<LogOut size={18} />}
+        />
 
       </div>
 

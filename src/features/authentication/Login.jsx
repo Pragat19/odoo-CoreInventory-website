@@ -44,7 +44,7 @@ export default function Login() {
           type="email"
           placeholder="Enter email"
           value={form.email}
-          onChange={(e)=>setForm({...form,email:e.target.value})}
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
           required
         />
 
@@ -53,9 +53,18 @@ export default function Login() {
           isPassword
           placeholder="Enter password"
           value={form.password}
-          onChange={(e)=>setForm({...form,password:e.target.value})}
+          onChange={(e) => setForm({ ...form, password: e.target.value })}
           required
         />
+
+        <div className="forgot-row">
+  <p
+    className="forgot-password"
+    onClick={() => navigate("/forgot-password")}
+  >
+    Forgot Password?
+  </p>
+</div>
 
         <AppButton
           type="submit"

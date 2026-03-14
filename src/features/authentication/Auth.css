@@ -22,3 +22,17 @@
   text-align:center;
   margin-top:15px;
 }
+
+.forgot-row{
+  display:flex;
+  justify-content:flex-end;
+  margin-top:-40px; /* removes extra gap visually */
+  margin-bottom: 20px;
+}
+
+.forgot-password{
+  cursor:pointer;
+  color:#1E3A8A;
+  margin:0;
+  font-size:14px;
+}

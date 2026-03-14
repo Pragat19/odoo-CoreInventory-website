@@ -1,6 +1,7 @@
 import { useState } from "react";
 import LedgerTable from "./LedgerTable";
 import "./Ledger.css";
+import FilterBar from "../../components/FilterBar";
 
 export default function StockLedger() {
 
@@ -43,6 +44,27 @@ export default function StockLedger() {
     }
   ]);
 
+  const [filters, setFilters] = useState({
+    type: "",
+    status: "",
+    warehouse: ""
+  });
+
+  const filteredData = ledger.filter(item => {
+
+    if (filters.type && item.type !== filters.type)
+      return false;
+
+    if (filters.status && item.status !== filters.status)
+      return false;
+
+    if (filters.warehouse && item.warehouse !== filters.warehouse)
+      return false;
+
+    return true;
+
+  });
+
   return (
     <div className="ledger-page">
 
@@ -50,7 +72,8 @@ export default function StockLedger() {
         <h2>Stock Ledger</h2>
       </div>
 
-      <LedgerTable data={ledger} />
+      <FilterBar filters={filters} setFilters={setFilters} />
+      <LedgerTable data={filteredData} />
 
     </div>
   );

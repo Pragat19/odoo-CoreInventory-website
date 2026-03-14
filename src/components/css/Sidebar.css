@@ -38,3 +38,23 @@
   color:#1E3A8A;
   font-weight:600;
 }
+
+.sidebar{
+  width:240px;
+  height:100vh;
+  background:#1E3A8A;
+  color:white;
+  display:flex;
+  flex-direction:column;
+}
+
+.sidebar-menu{
+  display:flex;
+  flex-direction:column;
+  padding:10px;
+  flex:1;   /* pushes logout to bottom */
+}
+
+.sidebar-logout{
+  padding:15px;
+}
